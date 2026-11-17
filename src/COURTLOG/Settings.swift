@@ -1,12 +1,5 @@
 import WebKit
 
-struct Cookie {
-    var name: String
-    var value: String
-}
-
-let gcmMessageIDKey = "00000000000" // update this with actual ID if using Firebase 
-
 // URL for first launch
 let rootUrl = URL(string: "https://courtlog-app.axium-app.workers.dev")!
 
@@ -18,8 +11,6 @@ let allowedOrigins: [String] = ["courtlog-app.axium-app.workers.dev"]
 // These should also appear in Info.plist
 let authOrigins: [String] = []
 // allowedOrigins + authOrigins <= 10
-
-let platformCookie = Cookie(name: "app-platform", value: "iOS App Store")
 
 // UI options
 let displayMode = "standalone" // standalone / fullscreen.

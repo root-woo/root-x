@@ -56,7 +56,7 @@ class ViewController: UIViewController, WKNavigationDelegate, UIDocumentInteract
     }
     
     func initWebView() {
-        COURTLOG.webView = createWebView(container: webviewView, WKSMH: self, WKND: self, NSO: self, VC: self)
+        COURTLOG.webView = createWebView(container: webviewView, WKND: self, NSO: self, VC: self)
         webviewView.addSubview(COURTLOG.webView);
         
         COURTLOG.webView.uiDelegate = self;
@@ -253,24 +253,4 @@ extension UIColor {
         let brightness = Float(((components[0] * 299) + (components[1] * 587) + (components[2] * 114)) / 1000)
         return (brightness > threshold)
     }
-}
-
-extension ViewController: WKScriptMessageHandler {
-  func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if message.name == "print" {
-            printView(webView: COURTLOG.webView)
-        }
-        if message.name == "push-subscribe" {
-            handleSubscribeTouch(message: message)
-        }
-        if message.name == "push-permission-request" {
-            handlePushPermission()
-        }
-        if message.name == "push-permission-state" {
-            handlePushState()
-        }
-        if message.name == "push-token" {
-            handleFCMToken()
-        }
-  }
 }

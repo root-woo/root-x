@@ -3,27 +3,15 @@ import WebKit
 import AuthenticationServices
 import SafariServices
 
-
-func createWebView(container: UIView, WKSMH: WKScriptMessageHandler, WKND: WKNavigationDelegate, NSO: NSObject, VC: ViewController) -> WKWebView{
+// 앱은 웹 화면을 그대로 보여 주기만 한다. 앱 전용 기능(푸시·인쇄·플랫폼 표시 쿠키 등)은 넣지 않는다.
+func createWebView(container: UIView, WKND: WKNavigationDelegate, NSO: NSObject, VC: ViewController) -> WKWebView{
 
     let config = WKWebViewConfiguration()
-    let userContentController = WKUserContentController()
-
-    userContentController.add(WKSMH, name: "print")
-    userContentController.add(WKSMH, name: "push-subscribe")
-    userContentController.add(WKSMH, name: "push-permission-request")
-    userContentController.add(WKSMH, name: "push-permission-state")
-    userContentController.add(WKSMH, name: "push-token")
-
-    config.userContentController = userContentController
-
     config.limitsNavigationsToAppBoundDomains = true;
     config.allowsInlineMediaPlayback = true
     config.preferences.javaScriptCanOpenWindowsAutomatically = true
-    config.preferences.setValue(true, forKey: "standalone")
-    
+
     let webView = WKWebView(frame: calcWebviewFrame(webviewView: container, toolbarView: nil), configuration: config)
-    setCustomCookie(webView: webView)
 
     webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     webView.isHidden = true;
@@ -31,47 +19,16 @@ func createWebView(container: UIView, WKSMH: WKScriptMessageHandler, WKND: WKNav
     webView.scrollView.bounces = false
     webView.scrollView.contentInsetAdjustmentBehavior = .never
     webView.allowsBackForwardNavigationGestures = true
-    
-    // Check if macCatalyst 16.4+ is available and if so, enable web inspector.
-    // This allows the web app to be inspected using Safari Web Inspector. Supported on iOS 16.4+ and macOS 13.3+
-    if #available(iOS 16.4, macOS 13.3, *) {
-        webView.isInspectable = true
-    }
-    
-    let deviceModel = UIDevice.current.model
-    let osVersion = UIDevice.current.systemVersion
-    webView.configuration.applicationNameForUserAgent = "Safari/604.1"
-    webView.customUserAgent = "Mozilla/5.0 (\(deviceModel); CPU \(deviceModel) OS \(osVersion.replacingOccurrences(of: ".", with: "_")) like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(osVersion) Mobile/15E148 Safari/604.1 PWAShell"
 
     webView.addObserver(NSO, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: NSKeyValueObservingOptions.new, context: nil)
-    
+
     #if DEBUG
     if #available(iOS 16.4, *) {
         webView.isInspectable = true
     }
     #endif
-    
+
     return webView
-}
-
-func setAppStoreAsReferrer(contentController: WKUserContentController) {
-    let scriptSource = "document.referrer = `app-info://platform/ios-store`;"
-    let script = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-    contentController.addUserScript(script);
-}
-
-func setCustomCookie(webView: WKWebView) {
-    let _platformCookie = HTTPCookie(properties: [
-        .domain: rootUrl.host!,
-        .path: "/",
-        .name: platformCookie.name,
-        .value: platformCookie.value,
-        .secure: "FALSE",
-        .expires: NSDate(timeIntervalSinceNow: 31556926)
-    ])!
-
-    webView.configuration.websiteDataStore.httpCookieStore.setCookie(_platformCookie)
-
 }
 
 func calcWebviewFrame(webviewView: UIView, toolbarView: UIToolbar?) -> CGRect{
